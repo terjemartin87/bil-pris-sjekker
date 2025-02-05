@@ -19,9 +19,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="history"
         options={{
-          title: 'Utforsk',
+          title: 'History',
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="compass" color={color} />,
         }}
       />
