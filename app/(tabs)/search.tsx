@@ -1,128 +1,99 @@
-import { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState } from "react";
+import { View, TextInput, Button, FlatList, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
+import { fetchCarData } from "../lib/api"; 
 import { useRouter } from "expo-router";
+
+type CarData = {
+  kjennemerke: string;
+  merke: string;
+  modell: string;
+};
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [results, setResults] = useState<CarData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    // Hent lagret søkehistorikk
-    const loadSearchHistory = async () => {
-      const history = await AsyncStorage.getItem("searchHistory");
-      if (history) setSearchHistory(JSON.parse(history));
-    };
-    loadSearchHistory();
-  }, []);
-
   const handleSearch = async () => {
-    if (searchQuery.trim() === "") return;
+    if (!searchQuery.trim()) return;
 
-    const newHistory = [searchQuery, ...searchHistory];
-    setSearchHistory(newHistory);
-    setSearchQuery("");
-
-    // Lagre historikk lokalt
-    await AsyncStorage.setItem("searchHistory", JSON.stringify(newHistory));
-  };
-
-  const clearHistory = async () => {
-    setSearchHistory([]);
-    await AsyncStorage.removeItem("searchHistory");
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchCarData(searchQuery);
+      if (data) {
+        setResults([data]); // API-et returnerer ett resultat, så vi legger det i en liste
+      } else {
+        setResults([]);
+        setError("Ingen treff på dette registreringsnummeret.");
+      }
+    } catch (err) {
+      setError("Feil ved henting av data. Prøv igjen.");
+      console.error("Feil i API-kall:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Søk etter bil</Text>
-
+      <Text style={styles.title}>Søk etter bil</Text>
       <TextInput
         style={styles.input}
-        placeholder="Skriv inn skiltnummer, merke eller modell..."
+        placeholder="Skriv inn skiltnummer"
         value={searchQuery}
         onChangeText={setSearchQuery}
+        autoCapitalize="characters"
       />
+      <Button title="Søk" onPress={handleSearch} disabled={loading} />
+      
+      {loading && <ActivityIndicator size="large" style={styles.loader} />}
+      
+      {error && <Text style={styles.error}>{error}</Text>}
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleSearch}>
-          <Text style={styles.buttonText}>Søk</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={() => router.push("/scan")}>
-          <Text style={styles.buttonText}>Skann skilt</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.subHeader}>Tidligere søk:</Text>
       <FlatList
-        data={searchHistory}
-        keyExtractor={(item, index) => index.toString()}
+        data={results}
+        keyExtractor={(item) => item.kjennemerke}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} onPress={() => router.push(`/details/${item}`)}>
-            <Text style={styles.cardText}>{item}</Text>
+          <TouchableOpacity
+            style={styles.resultItem}
+            onPress={() => {
+              if (item.kjennemerke) {
+                router.push(`/${item.kjennemerke}`);
+              } else {
+                console.error("Kjennemerke mangler!");
+              }
+            }}
+          >
+            <Text style={styles.resultText}>
+              {item.kjennemerke} - {item.merke} {item.modell}
+            </Text>
           </TouchableOpacity>
         )}
       />
-
-      <TouchableOpacity style={styles.clearButton} onPress={clearHistory}>
-        <Text style={styles.buttonText}>Slett historikk</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f5f5f5" },
-  header: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
-  subHeader: { fontSize: 18, fontWeight: "bold", marginTop: 20 },
-  input: { 
-    height: 50, 
-    borderColor: "#ccc", 
-    borderWidth: 1, 
-    borderRadius: 5, 
-    paddingHorizontal: 10, 
-    marginBottom: 10, 
-    backgroundColor: "#fff" 
+  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  title: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    textTransform: "uppercase",
   },
-  buttonContainer: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    marginBottom: 10 
+  loader: { marginTop: 10 },
+  error: { color: "red", marginTop: 10 },
+  resultItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
-  button: { 
-    backgroundColor: "#007AFF", 
-    paddingVertical: 12, 
-    paddingHorizontal: 20, 
-    borderRadius: 8, 
-    alignItems: "center", 
-    flex: 1, 
-    marginHorizontal: 5 
-  },
-  buttonText: { 
-    color: "#fff", 
-    fontSize: 16, 
-    fontWeight: "bold" 
-  },
-  card: { 
-    backgroundColor: "#fff", 
-    padding: 15, 
-    borderRadius: 10, 
-    marginVertical: 5, 
-    shadowColor: "#000", 
-    shadowOpacity: 0.1, 
-    shadowRadius: 5, 
-    elevation: 2 
-  },
-  cardText: { 
-    fontSize: 16, 
-    fontWeight: "500" 
-  },
-  clearButton: { 
-    backgroundColor: "#FF3B30", 
-    paddingVertical: 12, 
-    borderRadius: 8, 
-    alignItems: "center", 
-    marginTop: 20 
-  }
+  resultText: { fontSize: 16 },
 });

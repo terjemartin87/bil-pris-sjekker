@@ -1,30 +1,30 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
-import { Camera, CameraType } from "expo-camera";
+import { Camera, CameraType, useCameraPermissions } from "expo-camera";
 
 export default function ScanScreen() {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [type, setType] = useState(CameraType.back);
   const cameraRef = useRef<Camera | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
-  }, []);
+    if (!permission?.granted) {
+      requestPermission();
+    }
+  }, [permission]);
 
-  if (hasPermission === null) {
+  if (!permission) {
     return (
       <View style={styles.container}>
         <Text>Venter på kameratilgang...</Text>
       </View>
     );
   }
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <View style={styles.container}>
         <Text>Ingen tilgang til kamera</Text>
+        <Button title="Gi tilgang" onPress={requestPermission} />
       </View>
     );
   }

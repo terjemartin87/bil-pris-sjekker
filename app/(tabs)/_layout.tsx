@@ -1,30 +1,12 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
+import { Tabs } from "expo-router";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Hjem',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Søk',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="search" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: 'History',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="compass" color={color} />,
-        }}
-      />
+    <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
+      <Tabs.Screen name="index" options={{ title: "Hjem", tabBarIcon: ({ color }) => <FontAwesome name="home" size={28} color={color} /> }} />
+      <Tabs.Screen name="search" options={{ title: "Søk bil", tabBarIcon: ({ color }) => <FontAwesome name="search" size={28} color={color} /> }} />
+      <Tabs.Screen name="history" options={{ title: "Historikk", tabBarIcon: ({ color }) => <FontAwesome name="clock-o" size={28} color={color} /> }} />
     </Tabs>
   );
 }
