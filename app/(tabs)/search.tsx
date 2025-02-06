@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, FlatList, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
-import { fetchCarData } from "../lib/api"; 
+import { fetchCarData } from "../../lib/api"; 
 import { useRouter } from "expo-router";
 
 type CarData = {
