@@ -24,7 +24,7 @@ export default function SearchScreen() {
     try {
       const data = await fetchCarData(searchQuery);
       if (data) {
-        setResults([data]); // API-et returnerer ett resultat, så vi legger det i en liste
+        setResults([data]);
       } else {
         setResults([]);
         setError("Ingen treff på dette registreringsnummeret.");
@@ -60,11 +60,7 @@ export default function SearchScreen() {
           <TouchableOpacity
             style={styles.resultItem}
             onPress={() => {
-              if (item.kjennemerke) {
-                router.push(`/${item.kjennemerke}`);
-              } else {
-                console.error("Kjennemerke mangler!");
-              }
+              router.push({ pathname: "/bil/[kjennemerke]", params: { kjennemerke: item.kjennemerke } });
             }}
           >
             <Text style={styles.resultText}>
