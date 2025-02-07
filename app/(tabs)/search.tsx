@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, FlatList, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
-import { fetchCarData } from "../../lib/api"; 
+import { fetchCarData } from "../../services/api"; 
 import { useRouter } from "expo-router";
 
 type CarData = {
@@ -48,6 +48,7 @@ export default function SearchScreen() {
         autoCapitalize="characters"
       />
       <Button title="Søk" onPress={handleSearch} disabled={loading} />
+      <Button title="Scan etter skilt" onPress={() => router.push("/scan")} />
       
       {loading && <ActivityIndicator size="large" style={styles.loader} />}
       
@@ -60,7 +61,7 @@ export default function SearchScreen() {
           <TouchableOpacity
             style={styles.resultItem}
             onPress={() => {
-              router.push({ pathname: "/bil/[kjennemerke]", params: { kjennemerke: item.kjennemerke } });
+              router.push({ pathname: "./bil/[kjennemerke]", params: { kjennemerke: item.kjennemerke } });
             }}
           >
             <Text style={styles.resultText}>

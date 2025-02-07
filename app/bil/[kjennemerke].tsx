@@ -1,56 +1,37 @@
-import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
-import { fetchCarData } from "../../lib/api";
+import { useEffect, useState } from "react";
+import { View, Text } from "react-native";
+import { useRouter } from "expo-router";
 
-export default function CarDetailScreen() {
-  const { kjennemerke } = useLocalSearchParams();
-  const [carData, setCarData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const CarDetails = ({ route }: any) => {
+  const { kjennemerke } = route.params;
+  const [carData, setCarData] = useState<{ kjennemerke: string; modell: string; merke: string } | null>(null);
 
   useEffect(() => {
-    const getCarData = async () => {
-      if (!kjennemerke) return;
+    // Henter bildata (simulert API-kall)
+    const fetchCarData = async () => {
       try {
-        const data = await fetchCarData(kjennemerke as string);
+        const response = await fetch(`https://api.example.com/cars/${kjennemerke}`);
+        const data = await response.json();
         setCarData(data);
-      } catch (err) {
-        setError("Feil ved henting av bilinformasjon.");
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error("Feil ved henting av bildata:", error);
       }
     };
 
-    getCarData();
+    fetchCarData();
   }, [kjennemerke]);
 
-  if (loading) {
-    return <ActivityIndicator size="large" style={styles.loader} />;
-  }
-
-  if (error) {
-    return <Text style={styles.error}>{error}</Text>;
-  }
-
   if (!carData) {
-    return <Text style={styles.error}>Ingen data funnet.</Text>;
+    return <Text>Laster data...</Text>;
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{carData.merke} {carData.modell}</Text>
-      <Text style={styles.detail}>Skiltnummer: {carData.kjennemerke}</Text>
-      <Text style={styles.detail}>Årsmodell: {carData.arsmodell}</Text>
-      <Text style={styles.detail}>Farge: {carData.farge}</Text>
+    <View>
+      <Text>Kjennemerke: {carData.kjennemerke}</Text>
+      <Text>Modell: {carData.modell}</Text>
+      <Text>Merke: {carData.merke}</Text>
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
-  detail: { fontSize: 18, marginBottom: 5 },
-  loader: { marginTop: 20 },
-  error: { color: "red", marginTop: 20 },
-});
+export default CarDetails;

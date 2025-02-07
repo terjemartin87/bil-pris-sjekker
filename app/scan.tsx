@@ -1,64 +1,30 @@
-import React, { useState, useRef, useEffect } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import { Camera, CameraType, useCameraPermissions } from "expo-camera";
+import { useEffect, useState } from "react";
+import { View, Text, Button } from "react-native";
+import { Camera } from "expo-camera";
 
-export default function ScanScreen() {
-  const [permission, requestPermission] = useCameraPermissions();
-  const [type, setType] = useState(CameraType.back);
-  const cameraRef = useRef<Camera | null>(null);
+const ScanScreen = () => {
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!permission?.granted) {
-      requestPermission();
-    }
-  }, [permission]);
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync(); // RIKTIG METODE
+      setHasPermission(status === "granted");
+    })();
+  }, []);
 
-  if (!permission) {
-    return (
-      <View style={styles.container}>
-        <Text>Venter på kameratilgang...</Text>
-      </View>
-    );
+  if (hasPermission === null) {
+    return <Text>Ber om kameratilgang...</Text>;
   }
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <Text>Ingen tilgang til kamera</Text>
-        <Button title="Gi tilgang" onPress={requestPermission} />
-      </View>
-    );
+  if (hasPermission === false) {
+    return <Text>Ingen kameratilgang</Text>;
   }
-
-  const handleCapture = async () => {
-    if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync();
-      console.log("Bilde tatt:", photo.uri);
-    }
-  };
 
   return (
-    <View style={styles.container}>
-      <Camera ref={cameraRef} style={styles.camera} type={type} />
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Bytt Kamera"
-          onPress={() =>
-            setType(type === CameraType.back ? CameraType.front : CameraType.back)
-          }
-        />
-        <Button title="Ta bilde" onPress={handleCapture} />
-      </View>
+    <View>
+      <Text>Kamera er klart</Text>
+      <Button title="Start scanning" onPress={() => console.log("Scanning...")} />
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-  camera: { flex: 1, width: "100%" },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    padding: 20,
-  },
-});
+export default ScanScreen;
