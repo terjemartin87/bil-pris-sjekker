@@ -19,6 +19,13 @@ export default function TabLayout() {
         }} 
       />
       <Tabs.Screen 
+        name="scan" 
+        options={{ 
+          title: "Scan skilt", 
+          tabBarIcon: ({ color }) => <FontAwesome name="camera" size={28} color={color} /> 
+        }} 
+      />
+      <Tabs.Screen 
         name="history" 
         options={{ 
           title: "Historikk", 
