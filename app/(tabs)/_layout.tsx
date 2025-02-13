@@ -12,10 +12,17 @@ export default function TabLayout() {
         }} 
       />
       <Tabs.Screen 
+        name="search-car" 
+        options={{ 
+          title: "Søk etter bil", 
+          tabBarIcon: ({ color }) => <FontAwesome name="car" size={28} color={color} /> 
+        }} 
+      />
+      <Tabs.Screen 
         name="search" 
         options={{ 
-          title: "Søk bil", 
-          tabBarIcon: ({ color }) => <FontAwesome name="search" size={28} color={color} /> 
+          title: "Søk etter skiltnr", 
+          tabBarIcon: ({ color }) => <FontAwesome name="id-card" size={28} color={color} /> 
         }} 
       />
       <Tabs.Screen 

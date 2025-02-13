@@ -11,7 +11,7 @@ interface Car {
   favoritt: boolean;
 }
 
-export default function HistoryScreen() {
+export default function history() {
   const [history, setHistory] = useState<Car[]>([]);
   const router = useRouter();
 
